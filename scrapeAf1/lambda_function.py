@@ -171,6 +171,14 @@ def send_discord_message(message):
     @client.event
     async def on_ready():
         print(f'We have logged in as {client.user}')
+        try:
+            print("This many messages in removed: ", len(message['removed']))
+            print("This many messages in added: ", len(message['added']))
+            print("This many messages in updated: ", len(message['updated']))
+        except KeyError:
+            print("Error on key for message")
+
+
 
         # Get the channel by ID
         for guild in client.guilds:
@@ -209,7 +217,7 @@ def scrape_and_send_message():
 
     diff = compare_search_results(res1, res2)
 
-    print(diff)
+    print("Difference found!")
 
     send_discord_message(diff)
 
