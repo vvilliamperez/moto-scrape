@@ -106,8 +106,8 @@ def scan_html_files_for_differences(file1, file2):
     return differences
 
 
-output = scan_html_files_for_differences('test/base.html', 'test/1missing.html')
-print(output)
+#output = scan_html_files_for_differences('test/base.html', 'test/1missing.html')
+#print(output)
 
 
 def format_discord_message(item_data):
@@ -228,4 +228,4 @@ def lambda_handler(event, context):
 # print(current_hash)
 
 
-send_discord_message(output)
+#send_discord_message(output)
