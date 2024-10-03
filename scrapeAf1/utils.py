@@ -2,6 +2,7 @@ import requests
 import hashlib
 import boto3
 import urllib.parse
+from bs4 import BeautifulSoup
 
 from botocore.exceptions import ClientError
 
@@ -57,15 +58,30 @@ def get_latest_object_from_s3(bucket_name, subdirectory):
         return None
 
 
-def get_site_hash(url):
+def get_site_hash_now(url):
     response = requests.get(url)
-    content = response.text
-    return hashlib.md5(content.encode('utf-8')).hexdigest()
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Remove dynamic elements
+    for tag in soup(['script', 'style']):
+        tag.decompose()
+
+    # You can also remove specific dynamic sections based on class or ID
+    for dynamic_section in soup.find_all(class_='ad-section'):
+        dynamic_section.decompose()
+
+    # Get the main content as text
+    main_content = soup.get_text()
+
+    return hashlib.md5(main_content.encode('utf-8')).hexdigest()
 
 
-def get_latest_hash(url, bucket):
+def get_latest_hash_in_s3(url, bucket):
     key = url_to_s3_path(url)
-    get_latest_object_from_s3(bucket, key)
+    subdirectory = key.split('/')[0]
+    obj = get_latest_object_from_s3(bucket, subdirectory)
+    return obj.body.read().decode('utf-8') if obj else None
 
 
 def store_hash_in_s3(bucket_name, key, hash_value):
