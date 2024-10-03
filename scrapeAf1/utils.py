@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 s3_client = boto3.client('s3')
 
 
-def url_to_s3_path(url):
+def url_to_s3_path(url, prefix=None):
     # Step 1: Parse the URL
     # Step 1: Parse the URL
     parsed_url = urllib.parse.urlparse(url)
@@ -31,8 +31,23 @@ def url_to_s3_path(url):
         query_part = query.replace('&', '_').replace('=', '-')
         s3_friendly_path += f'_{query_part}'
 
+    # Step 6: Optionally add a prefix to the S3 key
+    if prefix:
+        s3_friendly_path = f'{prefix}/{s3_friendly_path}'
+
     return s3_friendly_path
 
+
+def send_sns(topic_arn):
+    sns_client = boto3.client('sns')
+
+    response = sns_client.publish(
+        TopicArn=topic_arn,
+        Message='New site update detected!',
+        Subject='Site Update'
+    )
+
+    print(f"Sent SNS message with message ID: {response['MessageId']}")
 
 def get_latest_object_from_s3(bucket_name, subdirectory):
     """
@@ -80,7 +95,10 @@ def get_site_hash_now(url):
 def get_latest_hash_in_s3(url, bucket):
     key = url_to_s3_path(url)
     subdirectory = key.split('/')[0]
+    subdirectory = 'page_hashes' + '/' + subdirectory
     obj = get_latest_object_from_s3(bucket, subdirectory)
+    if not obj:
+        return None
 
     key = obj['Key']
     response = s3_client.get_object(Bucket=bucket, Key=key)
