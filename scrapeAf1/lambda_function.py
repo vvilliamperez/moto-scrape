@@ -50,7 +50,7 @@ def check_for_updates():
         }
 
 
-def extract_search_results(file_path):
+def extract_search_results_from_file_path(file_path):
     """
     Extracts all search results from a given HTML file within the 'search-results-list' div.
     """
@@ -68,6 +68,26 @@ def extract_search_results(file_path):
 
         # Extract the text content or relevant data from each search result panel
         return [panel.get_text(strip=True) for panel in search_result_panels]
+
+
+def extract_search_results(text):
+    """
+    Extracts all search results from a given HTML file within the 'search-results-list' div.
+    """
+    # Parse the HTML content using BeautifulSoup
+    soup = BeautifulSoup(text, 'html.parser')
+
+    # Find the search results list container
+    search_results_list = soup.find('div', class_='search-results-list')
+
+    if not search_results_list:
+        return []
+
+    # Find all search result panels within the search results list
+    search_result_panels = search_results_list.find_all('div', class_='panel panel-default search-result')
+
+    # Extract the text content or relevant data from each search result panel
+    return [panel.get_text(strip=True) for panel in search_result_panels]
 
 
 def compare_search_results(old_results, new_results):
@@ -127,6 +147,7 @@ def format_discord_message(item_data):
     formatted_message = f"**{name}**\nPrice: {price}\n[View More]({url})"
     return formatted_message
 
+
 def extract_json_from_string(data_str):
     # Step 1: Use regex to extract JSON portion (anything between the first '{' and last '}')
     json_match = re.search(r'(\{.*\})', data_str)
@@ -163,7 +184,7 @@ def send_discord_message(message):
                             await channel.send(f'Removed: {format_discord_message(item)}')
                     if message['added']:
                         for item in message['added']:
-                            item = extract_search_results(item)
+                            item = extract_json_from_string(item)
                             await channel.send(f'Added: {format_discord_message(item)}')
 
         await client.close()
@@ -178,7 +199,6 @@ def send_discord_message(message):
 def scrape_and_send_message():
     print(" TODO: scrape and send email")
 
-
     obj1, obj2 = get_latest_2_object_from_s3(BUCKET, url_to_s3_path(AF1_URL, prefix="archive"))
 
     html1 = get_html_from_s3(BUCKET, obj1['Key'])
@@ -192,18 +212,6 @@ def scrape_and_send_message():
     print(diff)
 
     send_discord_message(diff)
-
-
-
-
-
-
-
-
-
-
-    """use beautifulsoup4 to parse the site from the file in /test"""
-    pass
 
 
 def is_site_updated(event):
