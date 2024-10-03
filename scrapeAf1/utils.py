@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests
 import hashlib
 import boto3
@@ -49,6 +50,7 @@ def send_sns(topic_arn):
 
     print(f"Sent SNS message with message ID: {response['MessageId']}")
 
+
 def get_latest_object_from_s3(bucket_name, subdirectory):
     """
     Retrieve the latest object from a specific subdirectory in the S3 bucket based on the LastModified date.
@@ -92,18 +94,46 @@ def get_site_hash_now(url):
     return hashlib.md5(main_content.encode('utf-8')).hexdigest()
 
 
+def archive_site_in_s3(bucket_name, key, url):
+    try:
+        response = requests.get(url)
+
+        response.raise_for_status()  # Raise error for bad responses (4xx or 5xx)
+
+        # Create a unique S3 key using timestamp and the URL domain
+        timestamp = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
+
+        s3_key = f"{key}_{timestamp}.html"
+
+        # Upload content to S3
+        s3_client.put_object(
+            Bucket=bucket_name,
+            Key=s3_key,
+            Body=response.content,
+            ContentType='text/html'
+        )
+
+        return f"Website archived successfully at s3://{bucket_name}/{s3_key}"
+    except requests.exceptions.RequestException as e:
+        return f"Failed to fetch the website: {e}"
+
+
 def get_latest_hash_in_s3(url, bucket):
-    key = url_to_s3_path(url)
-    subdirectory = key.split('/')[0]
-    subdirectory = 'page_hashes' + '/' + subdirectory
-    obj = get_latest_object_from_s3(bucket, subdirectory)
-    if not obj:
+    try:
+        key = url_to_s3_path(url)
+        subdirectory = key.split('/')[0]
+        subdirectory = 'page_hashes' + '/' + subdirectory
+        obj = get_latest_object_from_s3(bucket, subdirectory)
+        if not obj:
+            return None
+
+        key = obj['Key']
+        response = s3_client.get_object(Bucket=bucket, Key=key)
+
+        return response['Body'].read().decode('utf-8')
+    except ClientError as e:
+        print(f"Error retrieving hash from S3: {e}")
         return None
-
-    key = obj['Key']
-    response = s3_client.get_object(Bucket=bucket, Key=key)
-
-    return response['Body'].read().decode('utf-8')
 
 
 def store_hash_in_s3(bucket_name, key, hash_value):
