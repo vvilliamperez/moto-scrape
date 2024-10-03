@@ -81,7 +81,11 @@ def get_latest_hash_in_s3(url, bucket):
     key = url_to_s3_path(url)
     subdirectory = key.split('/')[0]
     obj = get_latest_object_from_s3(bucket, subdirectory)
-    return obj.body.read().decode('utf-8') if obj else None
+
+    key = obj['Key']
+    response = s3_client.get_object(Bucket=bucket, Key=key)
+
+    return response['Body'].read().decode('utf-8')
 
 
 def store_hash_in_s3(bucket_name, key, hash_value):
