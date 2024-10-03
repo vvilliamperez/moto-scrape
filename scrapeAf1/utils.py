@@ -75,6 +75,33 @@ def get_latest_object_from_s3(bucket_name, subdirectory):
         return None
 
 
+def get_latest_2_object_from_s3(bucket_name: object, subdirectory: object) -> object:
+    """
+    Retrieve the latest object from a specific subdirectory in the S3 bucket based on the LastModified date.
+    """
+    try:
+        # List all objects in the subdirectory (using Prefix to simulate a subdirectory)
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=subdirectory)
+
+        # Check if the subdirectory is empty
+        if 'Contents' not in response:
+            print(f"No objects found in the subdirectory: {subdirectory}")
+            return None
+
+        # Sort objects by the LastModified date to get the latest one
+        sorted_objects = sorted(response['Contents'], key=lambda obj: obj['LastModified'], reverse=True)
+
+        # Return the latest object
+        return sorted_objects[0], sorted_objects[1]
+
+    except ClientError as e:
+        print(f"Error retrieving objects from S3: {e}")
+        return None
+    except IndexError as e:
+        print(f"Error retrieving objects from S3: {e}")
+        return None
+
+
 def get_site_hash_now(url):
     response = requests.get(url)
 
@@ -134,6 +161,21 @@ def get_latest_hash_in_s3(url, bucket):
     except ClientError as e:
         print(f"Error retrieving hash from S3: {e}")
         return None
+
+
+def get_html_from_s3(bucket_name, key):
+    """
+    Retrieve the HTML content of an S3 object.
+    """
+    try:
+        response = s3_client.get_object(
+            Bucket=bucket_name,
+            Key=key
+        )
+        return response['Body'].read().decode('utf-8')
+    except ClientError as e:
+        print(f"Error retrieving object from S3: {e}")
+        return None,
 
 
 def store_hash_in_s3(bucket_name, key, hash_value):
