@@ -1,9 +1,9 @@
+import json
+import re
 from datetime import datetime
 import requests
-import hashlib
 import boto3
 import urllib.parse
-from bs4 import BeautifulSoup
 
 from botocore.exceptions import ClientError
 
@@ -102,25 +102,6 @@ def get_latest_2_object_from_s3(bucket_name: object, subdirectory: object) -> ob
         return None
 
 
-def get_site_hash_now(url):
-    response = requests.get(url)
-
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    # Remove dynamic elements
-    for tag in soup(['script', 'style']):
-        tag.decompose()
-
-    # You can also remove specific dynamic sections based on class or ID
-    for dynamic_section in soup.find_all(class_='ad-section'):
-        dynamic_section.decompose()
-
-    # Get the main content as text
-    main_content = soup.get_text()
-
-    return hashlib.md5(main_content.encode('utf-8')).hexdigest()
-
-
 def archive_site_in_s3(bucket_name, key, url):
     try:
         response = requests.get(url)
@@ -145,25 +126,7 @@ def archive_site_in_s3(bucket_name, key, url):
         return f"Failed to fetch the website: {e}"
 
 
-def get_latest_hash_in_s3(url, bucket):
-    try:
-        key = url_to_s3_path(url)
-        subdirectory = key.split('/')[0]
-        subdirectory = 'page_hashes' + '/' + subdirectory
-        obj = get_latest_object_from_s3(bucket, subdirectory)
-        if not obj:
-            return None
-
-        key = obj['Key']
-        response = s3_client.get_object(Bucket=bucket, Key=key)
-
-        return response['Body'].read().decode('utf-8')
-    except ClientError as e:
-        print(f"Error retrieving hash from S3: {e}")
-        return None
-
-
-def get_html_from_s3(bucket_name, key):
+def get_html_body_from_s3(bucket_name, key):
     """
     Retrieve the HTML content of an S3 object.
     """
@@ -178,18 +141,102 @@ def get_html_from_s3(bucket_name, key):
         return None,
 
 
-def store_hash_in_s3(bucket_name, key, hash_value):
+def extract_json_from_string(data_str):
+    # Step 1: Use regex to extract JSON portion (anything between the first '{' and last '}')
+    json_match = re.search(r'(\{.*\})', data_str)
+    if json_match:
+        json_str = json_match.group(1)  # Get the matched JSON string
+        try:
+            # Step 2: Parse the JSON string into a dictionary
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            print("Failed to decode JSON")
+            return None
+    else:
+        print("No JSON found in the input string.")
+        return None
+
+
+def scan_html_files_for_differences(file1, file2):
     """
-    Store the MD5 hash in an S3 object.
+    Scans two HTML files and returns a dict with the differences in the search results list.
     """
+    # Extract search results from both HTML files
+    old_results = extract_search_results(file1)
+    new_results = extract_search_results(file2)
+
+    # Compare the results
+    differences = compare_search_results(old_results, new_results)
+
+    return differences
+
+
+def compare_search_results(old_results, new_results):
+    """
+    Compares two lists of search results and returns a dict with removed, updated, and added results.
+    """
+    old_set = set(old_results)
+    new_set = set(new_results)
+
+    removed = list(old_set - new_set)
+    added = list(new_set - old_set)
+
+    # Updated results (if necessary) would require a deeper comparison of individual items
+    # Here, we're treating "updated" as something that exists in both, but its content differs.
+    # Since we use strings, there might not be a perfect way to detect updates without custom logic.
+    updated = [new_result for new_result in new_set if new_result in old_set and old_results != new_results]
+
+    return {
+        'removed': removed,
+        'added': added,
+        'updated': updated
+    }
+
+
+def extract_search_results(text):
+    """
+    Extracts all search results from a given HTML file within the 'search-results-list' div.
+    """
+    # Parse the HTML content using BeautifulSoup
+    soup = BeautifulSoup(text, 'html.parser')
+
+    # Find the search results list container
+    search_results_list = soup.find('div', class_='search-results-list')
+
+    if not search_results_list:
+        return []
+
+    # Find all search result panels within the search results list
+    search_result_panels = search_results_list.find_all('div', class_='panel panel-default search-result')
+
+    # Extract the text content or relevant data from each search result panel
+    return [panel.get_text(strip=True) for panel in search_result_panels]
+
+
+def extract_search_results_from_file_path(file_path):
+    """
+    Extracts all search results from a given HTML file within the 'search-results-list' div.
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        soup = BeautifulSoup(file, 'html.parser')
+
+        # Find the search results list container
+        search_results_list = soup.find('div', class_='search-results-list')
+
+        if not search_results_list:
+            return []
+
+        # Find all search result panels within the search results list
+        search_result_panels = search_results_list.find_all('div', class_='panel panel-default search-result')
+
+        # Extract the text content or relevant data from each search result panel
+        return [panel.get_text(strip=True) for panel in search_result_panels]
+
+
+def is_site_updated(event):
     try:
-        response = s3_client.put_object(
-            Bucket=bucket_name,
-            Key=key,
-            Body=hash_value
-        )
-        print(f"Successfully stored hash: {hash_value} in S3 under key: {key}")
-    except ClientError as e:
-        print(f"Error uploading to S3: {e}")
-
-
+        sns_message = event['Records'][0]['Sns']['Message']
+        print(f"Received SNS message: {sns_message}")
+        return sns_message is not None
+    except KeyError:
+        return False
