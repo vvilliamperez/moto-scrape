@@ -15,7 +15,7 @@ def lambda_handler(event, context):
         "event": event,
         "context": context,
     }
-    logger.info(json.dumps(log_data))
+    logger.info(log_data)
 
     if is_site_updated(event):
         # get changes from archive and send discord message

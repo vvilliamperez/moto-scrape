@@ -45,9 +45,9 @@ def send_discord_message(message):
     async def on_ready():
         logger.info(f"We have logged in as {client.user}")
         try:
-            logger.info("This many messages in removed: ", len(message["removed"]))
-            logger.info("This many messages in added: ", len(message["added"]))
-            logger.info("This many messages in updated: ", len(message["updated"]))
+            logger.info(f"This many messages in removed: {len(message["removed"])}")
+            logger.info(f"This many messages in added: {len(message["added"])}")
+            logger.info(f"This many messages in updated: {len(message["updated"])}")
         except KeyError:
             logger.error("Error on key for message")
 
