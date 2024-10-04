@@ -12,7 +12,6 @@ s3_client = boto3.client('s3')
 
 def url_to_s3_path(url, prefix=None):
     # Step 1: Parse the URL
-    # Step 1: Parse the URL
     parsed_url = urllib.parse.urlparse(url)
 
     # Step 2: Combine the netloc (domain) and path (URL path) into a path-like structure
