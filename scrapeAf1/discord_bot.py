@@ -44,7 +44,7 @@ def send_discord_message(message):
             print(f'Guild: {guild.name}')
             for channel in guild.text_channels:
                 print(f'Channel: {channel.name} (ID: {channel.id})')
-                if channel.name == 'bots':
+                if channel.name == 'af1-bot':
                     if message['removed']:
                         for item in message['removed']:
                             item = extract_json_from_string(item)
