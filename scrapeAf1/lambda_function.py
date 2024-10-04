@@ -1,5 +1,5 @@
 import os
-from scrapeAf1.check_hash_for_update import check_for_updates
+from scrapeAf1.check_for_updates import check_for_updates
 from scrapeAf1.discord_bot import get_changes_and_send_discord_message
 from scrapeAf1.utils import is_site_updated
 
