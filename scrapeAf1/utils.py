@@ -6,6 +6,7 @@ import boto3
 import urllib.parse
 
 from botocore.exceptions import ClientError
+from bs4 import BeautifulSoup
 
 s3_client = boto3.client('s3')
 
