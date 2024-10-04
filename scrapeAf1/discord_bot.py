@@ -1,8 +1,12 @@
+import os
+
 import discord
 
-from scrapeAf1.lambda_function import DISCORD_TOKEN, BUCKET, AF1_URL
-from scrapeAf1.utils import extract_json_from_string, get_latest_2_object_from_s3, url_to_s3_path, \
+from constants import BUCKET, AF1_URL
+from utils import extract_json_from_string, get_latest_2_object_from_s3, url_to_s3_path, \
     get_html_body_from_s3, compare_search_results, extract_search_results
+
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 
 def format_discord_message(item_data):

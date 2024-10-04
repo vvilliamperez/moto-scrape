@@ -5,8 +5,8 @@ import requests
 from botocore.exceptions import ClientError
 from bs4 import BeautifulSoup
 
-from scrapeAf1.lambda_function import AF1_URL, BUCKET, topic_arn
-from scrapeAf1.utils import url_to_s3_path, get_latest_object_from_s3, s3_client, archive_site_in_s3, send_sns
+from constants import AF1_URL, BUCKET, TOPIC_ARN
+from utils import url_to_s3_path, get_latest_object_from_s3, s3_client, archive_site_in_s3, send_sns
 
 
 def get_site_hash_now(url):
@@ -85,7 +85,7 @@ def check_for_updates():
         archive_site_in_s3(BUCKET, url_to_s3_path(AF1_URL, prefix="archive"), AF1_URL)
 
         # send sns
-        send_sns(topic_arn)
+        send_sns(TOPIC_ARN)
 
         return {
             'statusCode': 200,
