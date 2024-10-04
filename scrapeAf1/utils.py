@@ -179,7 +179,7 @@ def scan_html_files_for_differences(file1, file2) -> dict:
     return differences
 
 
-def compare_search_results(old_results: [], new_results: []) -> dict:
+def compare_search_results(new_results: [], old_results: []) -> dict:
     """
     Compares two lists of search results and returns a dict with removed, updated, and added results.
     """
