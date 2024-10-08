@@ -25,7 +25,17 @@ def format_discord_message(item_data):
 
     # Extract relevant fields
     name = item_data.get("item", "Unknown")
-    price = item_data.get("bestPrice", "Price not available")
+
+    """ Price can be in different keys depending on the item """
+    price_keys = ["bestPrice", "itemPrice", "unitPrice", "itemDisplayPrice"]
+    price = ""
+    for key in price_keys:
+        price = item_data.get(key)
+        if price:
+            break
+    if not price:
+        price = "Unknown"
+
     url = item_data.get("itemUrl", "")
 
     # If URL is missing the "https:" prefix, add it
