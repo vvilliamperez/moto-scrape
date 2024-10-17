@@ -10,6 +10,7 @@ from utils import (
     get_html_body_from_s3,
     compare_search_results,
     extract_search_results,
+    extract_milage_from_string,
 )
 
 logger = logging.getLogger()
@@ -46,7 +47,6 @@ def format_discord_message(item_data):
     if milage:
         milage = f"{int(milage):,}"  # format the milage with commas
 
-
     # Format the message for Discord
     formatted_message = f"**{name}**\nPrice: {price} {f"Milage: {milage}" if milage else ""}\n[Link]({url})"
     return formatted_message
@@ -74,14 +74,18 @@ def send_discord_message(message):
                 if channel.name == "af1-bot":
                     if message["removed"]:
                         for item in message["removed"]:
-                            item = extract_json_from_string(item)
+                            item_dict = extract_json_from_string(item)
+                            item_dict["milage"] = extract_milage_from_string(item)
                             await channel.send(
-                                f"Removed: {format_discord_message(item)}"
+                                f"Removed: {format_discord_message(item_dict)}"
                             )
                     if message["added"]:
                         for item in message["added"]:
-                            item = extract_json_from_string(item)
-                            await channel.send(f"Added: {format_discord_message(item)}")
+                            item_dict = extract_json_from_string(item)
+                            item_dict["milage"] = extract_milage_from_string(item)
+                            await channel.send(
+                                f"Added: {format_discord_message(item_dict)}"
+                            )
 
         await client.close()
 
