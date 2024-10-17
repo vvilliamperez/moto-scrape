@@ -4,7 +4,7 @@ from discord_bot import format_discord_message
 from utils import (
     extract_search_results_from_file_path,
     compare_search_results,
-    extract_json_from_string,
+    extract_json_from_string, extract_milage_from_string,
 )
 
 
