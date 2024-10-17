@@ -52,7 +52,7 @@ def create_deployment_package(project_dir):
     try:
         for package in packages:
             print(f"Installing {package} into package directory...")
-            run_command(f"pip install --target {package_dir} {package}")
+            run_command(f"pip install --target {package_dir} --platform manylinux2014_aarch64 --only-binary=:all: {package}")
         print("Installed all packages into package directory.")
     except subprocess.CalledProcessError as e:
         print(f"Error: Failed to install dependencies. {e}")
