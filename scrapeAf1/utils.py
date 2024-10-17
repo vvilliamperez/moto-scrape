@@ -146,6 +146,18 @@ def get_html_body_from_s3(bucket_name: str, key: str) -> str:
     except ClientError as e:
         logger.error(f"Error retrieving object from S3: {e}")
 
+def extract_milage_from_string(data_str: str) -> str:
+    # Step 1: Use regext to extract the milage. It only appears in the beginning of the string, outside the JSON.
+    # Example string to look for : "Usage238 Miles"
+    milage_match = re.search(r"Usage(\d+)", data_str)
+    if milage_match:
+        return milage_match.group(1)
+    else:
+        logger.error("No milage found in the input string.")
+        logger.error(f"Input string: {data_str}")
+        return ""
+    
+
 
 def extract_json_from_string(data_str: str) -> dict:
     # Step 1: Use regex to extract JSON portion (anything between the first '{' and last '}')
