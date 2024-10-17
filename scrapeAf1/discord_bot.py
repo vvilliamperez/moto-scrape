@@ -48,7 +48,7 @@ def format_discord_message(item_data):
         milage = f"{int(milage):,}"  # format the milage with commas
 
     # Format the message for Discord
-    formatted_message = f"**{name}**\nPrice: {price} {f"Milage: {milage}" if milage else ""}\n[Link]({url})"
+    formatted_message = f"**{name}**\nPrice: ${price} {f"Milage: {milage}" if milage else ""}\n[Link]({url})"
     return formatted_message
 
 
