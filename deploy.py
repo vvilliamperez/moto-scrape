@@ -14,6 +14,13 @@ S3_BUCKET = "moto-scraper"
 LAMBDA_FUNCTION_NAME = "scrapeAf1"
 DEPLOYMENT_PACKAGE = "my_deployment_package.zip"
 
+AWS_PROFILE = "AdministratorAccess-986354456027"
+AWS_REGION = "us-east-1"
+
+
+session = boto3.Session(profile_name=AWS_PROFILE, region_name=AWS_REGION)
+
+
 
 def upload_to_s3(file_name, bucket, object_name=None):
     """Upload a file to an S3 bucket."""
@@ -21,7 +28,7 @@ def upload_to_s3(file_name, bucket, object_name=None):
         object_name = file_name
 
     # Upload the file
-    s3_client = boto3.client("s3")
+    s3_client = session.client("s3")
     try:
         s3_client.upload_file(file_name, bucket, object_name)
         print(f"File {file_name} uploaded to S3 bucket {bucket} successfully.")
@@ -35,7 +42,7 @@ def upload_to_s3(file_name, bucket, object_name=None):
 
 def update_lambda_function(lambda_function_name, s3_bucket, s3_key):
     """Update the AWS Lambda function's code with the deployment package in S3."""
-    lambda_client = boto3.client("lambda")
+    lambda_client = session.client("lambda")
 
     try:
         response = lambda_client.update_function_code(
