@@ -77,7 +77,7 @@ def create_deployment_package(project_dir):
     try:
         for py_file in python_files:
             print(f"Adding {py_file} to my_deployment_package.zip")
-            run_command(f"zip my_deployment_package.zip {py_file}")
+            run_command(f"zip -j my_deployment_package.zip {py_file}")
         print("Added all Python files to my_deployment_package.zip")
     except subprocess.CalledProcessError as e:
         print(f"Error: Failed to add Python files to the zip package. {e}")
