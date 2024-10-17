@@ -21,7 +21,7 @@ def upload_to_s3(file_name, bucket, object_name=None):
         object_name = file_name
 
     # Upload the file
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client("s3")
     try:
         s3_client.upload_file(file_name, bucket, object_name)
         print(f"File {file_name} uploaded to S3 bucket {bucket} successfully.")
@@ -32,16 +32,17 @@ def upload_to_s3(file_name, bucket, object_name=None):
     # Return the S3 URI
     return f"s3://{bucket}/{object_name}"
 
+
 def update_lambda_function(lambda_function_name, s3_bucket, s3_key):
     """Update the AWS Lambda function's code with the deployment package in S3."""
-    lambda_client = boto3.client('lambda')
+    lambda_client = boto3.client("lambda")
 
     try:
         response = lambda_client.update_function_code(
             FunctionName=lambda_function_name,
             S3Bucket=s3_bucket,
             S3Key=s3_key,
-            Publish=True  # Automatically publish a new version
+            Publish=True,  # Automatically publish a new version
         )
         print(f"Lambda function {lambda_function_name} updated successfully.")
         return response
@@ -49,13 +50,16 @@ def update_lambda_function(lambda_function_name, s3_bucket, s3_key):
         print(f"Failed to update Lambda function: {e}")
         return None
 
+
 if __name__ == "__main__":
     # Ensure the deployment package exists
     package_to_deploy = os.path.join(os.getcwd(), "scrapeAf1")
     os.chdir(package_to_deploy)
 
     if not os.path.exists(DEPLOYMENT_PACKAGE):
-        print(f"Error: {DEPLOYMENT_PACKAGE} not found. Please create the deployment package first.")
+        print(
+            f"Error: {DEPLOYMENT_PACKAGE} not found. Please create the deployment package first."
+        )
         exit(1)
 
     # Step 1: Upload the deployment package to S3

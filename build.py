@@ -12,7 +12,7 @@ def run_command(command):
 def read_requirements_file(requirements_file):
     """Reads the requirements.txt file and returns a list of packages."""
     if os.path.exists(requirements_file):
-        with open(requirements_file, 'r') as file:
+        with open(requirements_file, "r") as file:
             packages = [line.strip() for line in file if line.strip()]
             return packages
     else:
@@ -52,7 +52,9 @@ def create_deployment_package(project_dir):
     try:
         for package in packages:
             print(f"Installing {package} into package directory...")
-            run_command(f"pip install --target {package_dir} --platform manylinux2014_aarch64 --only-binary=:all: {package}")
+            run_command(
+                f"pip install --target {package_dir} --platform manylinux2014_aarch64 --only-binary=:all: {package}"
+            )
         print("Installed all packages into package directory.")
     except subprocess.CalledProcessError as e:
         print(f"Error: Failed to install dependencies. {e}")
