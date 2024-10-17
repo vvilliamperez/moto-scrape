@@ -37,6 +37,9 @@ def format_discord_message(item_data):
     if not price:
         price = "Unknown"
 
+    if price:
+        price = f"{int(price):,}"
+
     url = item_data.get("itemUrl", "")
 
     # If URL is missing the "https:" prefix, add it

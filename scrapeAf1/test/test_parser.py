@@ -50,7 +50,7 @@ def test_bike_is_added(added_list):
     formatted_message = format_discord_message(json_item)
 
     expected_message = """**2020 MT-10 - Yamaha**
-Price: 8999.0 Milage: 18,000
+Price: $8,999 Milage: 18,000
 [Link](https://www.af1racingaustin.com/inventory/2020-yamaha-mt-10-austin-tx-78753-12716611i)"""
     logger.info(formatted_message)
 
