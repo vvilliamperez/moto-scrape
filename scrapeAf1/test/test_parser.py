@@ -1,12 +1,17 @@
+import logging
+
 import pytest
 
-from discord_bot import format_discord_message
-from utils import (
+from scrapeAf1.discord_bot import format_discord_message
+from scrapeAf1.utils import (
     extract_search_results_from_file_path,
     compare_search_results,
-    extract_json_from_string, extract_milage_from_string,
+    extract_json_from_string,
+    extract_milage_from_string,
 )
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 @pytest.fixture
 def added_list():
@@ -39,13 +44,15 @@ def test_bike_is_added(added_list):
 
     item = diff["added"][0]
     json_item = extract_json_from_string(item)
+    json_item["milage"] = extract_milage_from_string(item)
     print(json_item)
 
     formatted_message = format_discord_message(json_item)
 
     expected_message = """**2020 MT-10 - Yamaha**
-Price: 8999.0
+Price: 8999.0 Milage: 18,000
 [Link](https://www.af1racingaustin.com/inventory/2020-yamaha-mt-10-austin-tx-78753-12716611i)"""
+    logger.info(formatted_message)
 
     assert formatted_message == expected_message
 
