@@ -1,5 +1,9 @@
 
+
+
 # moto-scrape
+
+![screenshot](./screenshot.png)
 
 AWS lambda for scraping used motorcycles listings, and notifying interested parties.
 
