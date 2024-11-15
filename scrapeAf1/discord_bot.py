@@ -10,7 +10,7 @@ from utils import (
     get_html_body_from_s3,
     compare_search_results,
     extract_search_results,
-    extract_milage_from_string,
+    extract_mileage_from_string,
 )
 
 logger = logging.getLogger()
@@ -20,7 +20,7 @@ logger.setLevel(logging.INFO)
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 
-def format_discord_message(item_data):
+def format_discord_message(item_data, removed=False):
     if item_data is None:
         return "No valid item data to format."
 
@@ -34,24 +34,26 @@ def format_discord_message(item_data):
         price = item_data.get(key)
         if price:
             break
-    if not price:
-        price = "Unknown"
 
-    if price:
-        price = f"{int(price):,}"
+    price = f"{int(price):,}" if price else "Unknown"
 
-    url = item_data.get("itemUrl", "")
+    mileage = item_data.get("mileage", "")
+    if mileage:
+        mileage = f"mileage: {int(mileage):,}"  # format the mileage with commas
 
-    # If URL is missing the "https:" prefix, add it
-    if not url.startswith("http"):
-        url = "https:" + url
+    if not removed:
+        url = item_data.get("itemUrl", "")
 
-    milage = item_data.get("milage", "")
-    if milage:
-        milage = f"{int(milage):,}"  # format the milage with commas
+        # If URL is missing the "https:" prefix, add it
+        if not url.startswith("http"):
+            url = "https:" + url
+
+        link = f"\n[Link]({url})"
+    else:
+        link = ""
 
     # Format the message for Discord
-    formatted_message = f"**{name}**\nPrice: ${price} {f"Milage: {milage}" if milage else ""}\n[Link]({url})"
+    formatted_message = f"**{name}**\nPrice: ${price} {mileage}{link}"
     return formatted_message
 
 
@@ -78,14 +80,14 @@ def send_discord_message(message):
                     if message["removed"]:
                         for item in message["removed"]:
                             item_dict = extract_json_from_string(item)
-                            item_dict["milage"] = extract_milage_from_string(item)
+                            item_dict["mileage"] = extract_mileage_from_string(item)
                             await channel.send(
-                                f"Removed: {format_discord_message(item_dict)}"
+                                f"Removed: {format_discord_message(item_dict, removed=True)}"
                             )
                     if message["added"]:
                         for item in message["added"]:
                             item_dict = extract_json_from_string(item)
-                            item_dict["milage"] = extract_milage_from_string(item)
+                            item_dict["mileage"] = extract_mileage_from_string(item)
                             await channel.send(
                                 f"Added: {format_discord_message(item_dict)}"
                             )

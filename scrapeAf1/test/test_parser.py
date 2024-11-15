@@ -7,7 +7,7 @@ from scrapeAf1.utils import (
     extract_search_results_from_file_path,
     compare_search_results,
     extract_json_from_string,
-    extract_milage_from_string,
+    extract_mileage_from_string,
 )
 
 logger = logging.getLogger()
@@ -44,13 +44,13 @@ def test_bike_is_added(added_list):
 
     item = diff["added"][0]
     json_item = extract_json_from_string(item)
-    json_item["milage"] = extract_milage_from_string(item)
+    json_item["mileage"] = extract_mileage_from_string(item)
     print(json_item)
 
     formatted_message = format_discord_message(json_item)
 
     expected_message = """**2020 MT-10 - Yamaha**
-Price: $8,999 Milage: 18,000
+Price: $8,999 mileage: 18,000
 [Link](https://www.af1racingaustin.com/inventory/2020-yamaha-mt-10-austin-tx-78753-12716611i)"""
     logger.info(formatted_message)
 
