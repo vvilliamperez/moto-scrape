@@ -21,6 +21,10 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 
 def format_discord_message(item_data, removed=False):
+    price_msg = "Unknown"
+    mileage_msg = "Unknown"
+    link_msg = ""
+
     if item_data is None:
         return "No valid item data to format."
 
@@ -30,16 +34,12 @@ def format_discord_message(item_data, removed=False):
     """ Price can be in different keys depending on the item """
     price_keys = ["bestPrice", "itemPrice", "unitPrice", "itemDisplayPrice"]
     for key in price_keys:
-        if price := item_data.get(key)
+        if price := item_data.get(key):
             price_msg = f"${int(price):,}"
             break
-    else:
-        price_msg = "Unknown"
 
-    if mileage := item_data.get("mileage")
+    if mileage := item_data.get("mileage"):
         mileage_msg = f" Mileage: {int(mileage):,}"  # format the mileage with commas
-    else:
-        mileage_msg = ""
 
     if not removed:
         url = item_data.get("itemUrl", "")
@@ -49,8 +49,6 @@ def format_discord_message(item_data, removed=False):
             url = "https:" + url
 
         link_msg = f"\n[Link]({url})"
-    else:
-        link_msg = ""
 
     # Format the message for Discord
     formatted_message = f"**{name}**\nPrice: {price_msg}{mileage_msg}{link_msg}"
