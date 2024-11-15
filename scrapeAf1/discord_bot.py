@@ -40,7 +40,7 @@ def format_discord_message(item_data, removed=False):
 
     mileage = item_data.get("mileage", "")
     if mileage:
-        mileage_msg = f" mileage: {int(mileage):,}"  # format the mileage with commas
+        mileage_msg = f" Mileage: {int(mileage):,}"  # format the mileage with commas
     else:
         mileage_msg = ""
 
@@ -51,12 +51,12 @@ def format_discord_message(item_data, removed=False):
         if not url.startswith("http"):
             url = "https:" + url
 
-        link = f"\n[Link]({url})"
+        link_msg = f"\n[Link]({url})"
     else:
-        link = ""
+        link_msg = ""
 
     # Format the message for Discord
-    formatted_message = f"**{name}**\nPrice: {price_msg}{mileage_msg}{link}"
+    formatted_message = f"**{name}**\nPrice: {price_msg}{mileage_msg}{link_msg}"
     return formatted_message
 
 
