@@ -29,17 +29,14 @@ def format_discord_message(item_data, removed=False):
 
     """ Price can be in different keys depending on the item """
     price_keys = ["bestPrice", "itemPrice", "unitPrice", "itemDisplayPrice"]
-    price = ""
     for key in price_keys:
-        price = item_data.get(key)
-        if price:
+        if price := item_data.get(key)
             price_msg = f"${int(price):,}"
             break
     else:
         price_msg = "Unknown"
 
-    mileage = item_data.get("mileage", "")
-    if mileage:
+    if mileage := item_data.get("mileage")
         mileage_msg = f" Mileage: {int(mileage):,}"  # format the mileage with commas
     else:
         mileage_msg = ""
