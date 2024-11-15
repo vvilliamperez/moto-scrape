@@ -33,13 +33,16 @@ def format_discord_message(item_data, removed=False):
     for key in price_keys:
         price = item_data.get(key)
         if price:
+            price_msg = f"${int(price):,}"
             break
-
-    price = f"{int(price):,}" if price else "Unknown"
+    else:
+        price_msg = "Unknown"
 
     mileage = item_data.get("mileage", "")
     if mileage:
-        mileage = f"mileage: {int(mileage):,}"  # format the mileage with commas
+        mileage_msg = f" mileage: {int(mileage):,}"  # format the mileage with commas
+    else:
+        mileage_msg = ""
 
     if not removed:
         url = item_data.get("itemUrl", "")
@@ -53,7 +56,7 @@ def format_discord_message(item_data, removed=False):
         link = ""
 
     # Format the message for Discord
-    formatted_message = f"**{name}**\nPrice: ${price} {mileage}{link}"
+    formatted_message = f"**{name}**\nPrice: {price_msg}{mileage_msg}{link}"
     return formatted_message
 
 
