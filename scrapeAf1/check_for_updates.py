@@ -22,6 +22,7 @@ logger.setLevel(logging.INFO)
 
 def get_site_hash_now(url: str) -> str:
     response = requests.get(url)
+    response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -70,7 +71,11 @@ def store_hash_in_s3(bucket_name: str, key: str, hash_value: str):
 
 def check_for_updates() -> dict:
     last_known_hash = get_latest_hash_in_s3(AF1_URL, BUCKET)
-    current_hash = get_site_hash_now(AF1_URL)
+    try:
+        current_hash = get_site_hash_now(AF1_URL)
+    except requests.exceptions.RequestException:
+        current_hash = None
+
 
     logger.info(f"Last known hash: {last_known_hash}, Current hash: {current_hash}")
 
